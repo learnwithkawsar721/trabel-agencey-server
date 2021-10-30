@@ -34,10 +34,11 @@ async function run() {
       res.json(result);
     });
     // Delete Services
-    app.post("/services/:id", async (req, res) => {
+    app.delete("/services/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const result = await servicesTable.deleteOne(query);
+      await bookingTable.deleteOne({ serviceId: id });
       if (result.deletedCount === 1) {
         res.send(result);
       } else {
@@ -56,17 +57,29 @@ async function run() {
     // Booking Api
 
     // Bookign Post API
-
     app.post("/bookign", async (req, res) => {
       const query = { serviceId: req.body.services._id, email: req.body.email };
       const checking = await bookingTable.findOne(query);
-      
+
       if (checking) {
         res.json("Already Booking");
       } else {
         const result = await bookingTable.insertOne(req.body);
         res.json(result);
       }
+    });
+
+    // status update
+    app.put("/booking/staus/:id", async (req, res) => {
+      const filter = { _id: ObjectId(req.params.id) };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          status: "approved",
+        },
+      };
+      const result = await bookingTable.updateOne(filter, updateDoc, options);
+      res.json(result);
     });
 
     // getBooking for Query
