@@ -58,9 +58,9 @@ async function run() {
     // Bookign Post API
 
     app.post("/bookign", async (req, res) => {
-      const query = { serviceId: req.body.services._id };
+      const query = { serviceId: req.body.services._id, email: req.body.email };
       const checking = await bookingTable.findOne(query);
-
+      
       if (checking) {
         res.json("Already Booking");
       } else {
